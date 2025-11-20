@@ -1,0 +1,58 @@
+x-constants:
+  db_username: &db_username geocontrol
+  db_password: &db_password geocontrol
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: geocontrol-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: geocontrol
+      MYSQL_USER: *db_username
+      MYSQL_PASSWORD: *db_password
+    ports:
+      - "3306:3306" # MySQL port
+    volumes:
+      - mysql-data:/var/lib/mysql # Persist MySQL data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql # Initialize the db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Backend service: Runs a Dockerfile located in the backend directory.
+  backend:
+    build:
+      context: ../ # Build context is the parent directory of the docker directory
+      dockerfile: docker/backend/Dockerfile # Dockerfile for the backend service
+    container_name: geocontrol-backend
+    environment:
+      DB_TYPE: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: geocontrol
+      DB_USERNAME: *db_username
+      DB_PASSWORD: *db_password
+    ports:
+      - "5001:5000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    # This command runs after the db is initialized and ready.
+    command: sh -c "npm run create-root && npm run start"
+
+  frontend:
+    image: smpolito/geocontrolui:latest
+    container_name: geocontrol-frontend
+    ports:
+      - "5173:5173" # Anchored variables defined above (e.g., &frontend_port) cannot be used within quoted strings.
+        # Values like port numbers must be written explicitly as literals, but they should remain consistent with the defined variables.
+    volumes: # Environment variables for the front-end must be defined in the frontend/env.vars.json and the file must be
+      - ./frontend/env-vars.json:/app/dist/config.json # explicitly mounted in the container to be effective
+
+volumes:
+  mysql-data:
+    driver: local

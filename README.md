@@ -1,5 +1,15 @@
 # GeoControl API
 
+## About This Project
+
+This project is a **group project** developed as part of the **Software Engineering** course at **Politecnico di Torino**. 
+
+**Note**: For privacy and security reasons, personal names and references to sensitive sites or resources have been removed or anonymized in this public version of the repository.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## Installation and Setup
 
 ### Prerequisites
@@ -15,6 +25,25 @@ Run the following command to install all required dependencies:
 
 ```sh
 npm install
+```
+
+### Environment Variables
+
+Before running the application, you should set the following environment variables for security:
+
+- `JWT_SECRET`: A secure random string for JWT token signing (required for production)
+- `ROOT_PASSWORD`: Password for the root admin user (if not set, a random password will be generated and logged)
+
+**Example setup:**
+
+```sh
+# Windows PowerShell
+$env:JWT_SECRET="your-very-secure-jwt-secret-here"
+$env:ROOT_PASSWORD="your-secure-root-password"
+
+# Unix/Linux/MacOS
+export JWT_SECRET="your-very-secure-jwt-secret-here"
+export ROOT_PASSWORD="your-secure-root-password"
 ```
 
 ### Running the Application
@@ -59,11 +88,13 @@ For debugging with hot reloading enabled:
 
 #### Creating the Root User
 
-To create the SQLite database file and add to it an admin user with credentials `root:rootpassword`, execute:
+To create the SQLite database file and add to it an admin user with credentials `root:[your-password]`, execute:
 
 ```sh
 npm run create-root
 ```
+
+**Important**: The root password is taken from the `ROOT_PASSWORD` environment variable. If not set, a random password will be generated and displayed in the logs.
 
 #### Running Tests
 
@@ -263,6 +294,10 @@ Contains all the following subfolders with the source code.
 
   - Contains a **complete Postman test suite** that can be used to manually test the API endpoints defined in **Swagger**.
     **[Download Postman](https://www.postman.com/downloads/)** to import the test collection (`GeoControl API Full Test Suite.postman_collection.json`) and run the requests against the API.
+
+    **Note**: The Postman collection variables have been anonymized for security. Set the following variables:
+    - `username`: `root`
+    - `password`: Use your `ROOT_PASSWORD` environment variable value
 
 - **`/setup`**
 
